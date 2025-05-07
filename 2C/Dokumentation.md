@@ -2,9 +2,9 @@
 
 **Team:**
 
-* Yanis Sebastian Zürcher
-* Jason Bichsel
-* Dominik Könitzer
+* Yanis Sebastian Zürcher - Doku & Umsetzung
+* Jason Bichsel - Recherche & Testing
+* Dominik Könitzer - Recherche
 
 **Datum:** 07.05.2025
 **Abgabezeitpunkt:** Vor dem Start des nächsten Unterrichtsblocks (14.05.2025)
@@ -51,36 +51,47 @@ Im Rahmen dieser praktischen Aufgabe sollte ein vollständiges Monitoring-Setup 
 
 2. **`docker-compose.yml` erstellen**
    ```yml
-    version: "3.8"
+   version: "3.8"
 
-    services:
-    prometheus:
-        image: prom/prometheus:v2.52.0
-        container_name: prometheus
-        volumes:
-        - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
-        ports:
-        - "9090:9090"
-        restart: unless-stopped
+   services:
+   prometheus:
+      image: prom/prometheus:v2.52.0
+      container_name: prometheus
+      volumes:
+         - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      ports:
+         - "9090:9090"
+      restart: unless-stopped
 
-    node-exporter:
-        image: prom/node-exporter:v1.8.0
-        container_name: node-exporter
-        ports:
-        - "9100:9100"
-        restart: unless-stopped
+   node-exporter:
+      image: prom/node-exporter:v1.8.0
+      container_name: node-exporter
+      ports:
+         - "9100:9100"
+      restart: unless-stopped
 
-    grafana:
-        image: grafana/grafana-oss:11.0.0
-        container_name: grafana
-        environment:
-        GF_SECURITY_ADMIN_USER: admin
-        GF_SECURITY_ADMIN_PASSWORD: admin
-        ports:
-        - "3000:3000"
-        depends_on:
-        - prometheus
-        restart: unless-stopped
+   mqtt-broker:
+      image: eclipse-mosquitto:2.0.21
+      container_name: mqtt-broker
+      ports: 
+         - "1883:1883"  
+      volumes:
+         - ./mosquitto.conf:/mosquitto/config/mosquitto.conf:ro
+      restart: unless-stopped
+
+   grafana:
+      image: grafana/grafana-oss:11.0.0
+      container_name: grafana
+      environment:
+         GF_SECURITY_ADMIN_USER: admin
+         GF_SECURITY_ADMIN_PASSWORD: admin
+      ports:
+         - "3000:3000"
+      depends_on:
+         - prometheus
+         - mqtt-broker
+      restart: unless-stopped
+                              
 
    ```
 
@@ -134,7 +145,7 @@ Im Rahmen dieser praktischen Aufgabe sollte ein vollständiges Monitoring-Setup 
 
 ## 6. Verifikation des Monitorings
 
-* **Prometheus Targets**: unter `http://localhost:9090/targets` zeigt `node` als `UP`.
+* **Prometheus Targets**: unter `http://localhost:9090/targets` zeigt node als UP.
      ![datasource](target.png)
 
 
