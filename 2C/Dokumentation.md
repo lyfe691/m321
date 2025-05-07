@@ -13,7 +13,9 @@
 
 ## 1. Zielsetzung
 
-Im Rahmen dieser praktischen Aufgabe sollte ein vollständiges Monitoring-Setup mit Prometheus, Node Exporter und Grafana aufgebaut werden. Ziel war es, live Metriken (CPU, RAM, Disk, Netzwerk) eines Linux-Hosts zu erfassen (windows 11 hat probeleme) und in einem Grafana-Dashboard darzustellen.
+1. Ein vollständiges Monitoring Setup aufsetzen mit **Prometheus**, **Node Exporter** und **Grafana** für Host Metriken.  
+2. Eine **MQTT-Integration** in Grafana demonstrieren: Broker aufsetzen, Plugin installieren, Live-Sensor-Daten visualisieren.
+
 
 ---
 
@@ -24,7 +26,7 @@ Im Rahmen dieser praktischen Aufgabe sollte ein vollständiges Monitoring-Setup 
 * **Prometheus** 
 * **Node Exporter** 
 * **Grafana OSS**
-* **GNU/Linux Kali Rolling** Container
+* **Kali Linux (Host) + Docker-Container**
 
 ---
 
@@ -34,16 +36,20 @@ Im Rahmen dieser praktischen Aufgabe sollte ein vollständiges Monitoring-Setup 
 ~/sq-grafana/
 ├── docker-compose.yml
 ├── prometheus.yml
-├── datasource.png      
-├── dashboard.png       
-└── doc.md              
+├── mosquitto.conf
+├── s.sh
+├── datasource.png
+├── dashboard.png
+├── mqtt-datasource.png
+├── mqtt-dashboard.png
+└── doc.md           
 ```
 
 ---
 
-## 4. Installation und Start 
+## 4. Setup & Deployment
 
-1. **Arbeitsverzeichnis anlegen**
+1. **verzeichnis anlegen**
 
    ```bash
    mkdir ~/sq-grafana && cd ~/sq-grafana
@@ -95,7 +101,7 @@ Im Rahmen dieser praktischen Aufgabe sollte ein vollständiges Monitoring-Setup 
 
    ```
 
-3. **`prometheus.yml` anlegen**
+3. **`prometheus.yml`**
    ```yml
     global:
     scrape_interval: 15s
@@ -108,13 +114,36 @@ Im Rahmen dieser praktischen Aufgabe sollte ein vollständiges Monitoring-Setup 
             - 'node-exporter:9100'
    ```
 
-4. **Stack starten**
+4. **`mosquitto.conf` **
+
+```config
+listener 1883
+allow_anonymous true
+```
+
+5. **`s.sh`**
+
+random 20.0–34.9°C Werte alle 5 Sek. als JSON { "value": xx.x }
 
    ```bash
-   docker-compose pull
-   docker-compose up -d
-   docker-compose ps
+   #!/bin/bash
+
+   while true; do
+   val=$(awk -v r=$RANDOM 'BEGIN{printf "%.1f", (r % 150)/10 + 20}')
+   mosquitto_pub -h localhost -t test/topic -m "{\"value\":$val}"
+   echo "Published value=$val"
+   sleep 5
+   done
+
    ```
+
+6. **Stack starten**
+
+```bash
+docker-compose pull
+docker-compose up -d
+docker-compose ps
+```
 
 ---
 
@@ -157,9 +186,51 @@ Im Rahmen dieser praktischen Aufgabe sollte ein vollständiges Monitoring-Setup 
 
 ---
 
-## 7. Fazit
+6. MQTT → Grafana
 
-Das vollständige Monitoring-Setup ließ sich binnen weniger Minuten reproduzierbar starten. Prometheus erfasst zuverlässig Systemmetriken vom Node Exporter, Grafana visualisiert diese live. Das Gesamtsystem erfüllt alle Anforderungen der praktischen Aufgabe und liefert anschauliche Dashboards.
+    MQTT-Plugin:
+    Falls noch nötig, in der grafana-shell (oder via GF_INSTALL_PLUGINS):
+
+    sudo grafana-cli plugins install briangann-grafana-mqtt-datasource
+    sudo systemctl restart grafana-server
+
+    Datenquelle:
+
+        ⚙️ Configuration → Add data source → MQTT
+
+        Name: MQTT-Broker
+
+        Broker URL: tcp://mqtt-broker:1883
+
+        Save & Test → Screenshot:
+
+    Panel erstellen:
+
+        ➕ Create → Dashboard → Add new panel
+
+        Data source: MQTT-Broker
+
+        Topic: test/topic
+
+        Value field: value
+
+        Visualization: Time series, Time range: Last 5 minutes → Apply
+
+        Screenshot:
+
+7. Issues & Lösungen
+
+    Mosquitto-Service scheiterte auf dem Host:
+    → haben stattdessen den Eclipse-Mosquitto-Container verwendet.
+
+    Port-Konflikte (1883) & Namenskonflikte:
+    → alte Container gelöscht, Ports nur für MQTT in Compose gemappt.
+
+    Leere MQTT-Panels:
+    → “Value field” auf value gesetzt und Table-View ausgeschaltet.
+
+    Integer-Division im Bash-Loop:
+    → durch AWK ersetzt, um Gleitkomma-Zahlen zu bekommen.
 
 ---
 
