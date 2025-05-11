@@ -6,25 +6,24 @@
 * Jason Bichsel - Recherche & Testing
 * Dominik Könitzer - Recherche
 
-**Datum:** 07.05.2025
-**Abgabezeitpunkt:** Vor dem Start des nächsten Unterrichtsblocks (14.05.2025)
+**Datum:** 11.05.2025
+**Deadline:** Vor dem Start des nächsten Unterrichtsblocks (14.05.2025)
 
 ---
 
 ## 1. Zielsetzung
 
-1. Ein vollständiges Monitoring Setup aufsetzen mit **Prometheus**, **Node Exporter** und **Grafana** für Host Metriken.  
+1. Ein vollständiges Monitoring Setup aufsetzen mit **Prometheus**, **Node Exporter** und **Grafana** für Host Metriken.
 2. Eine **MQTT-Integration** in Grafana demonstrieren: Broker aufsetzen, Plugin installieren, Live-Sensor-Daten visualisieren.
-
 
 ---
 
 ## 2. Verwendete Technologie
 
-* **Docker Engine** 
-* **Docker Compose** 
-* **Prometheus** 
-* **Node Exporter** 
+* **Docker Engine**
+* **Docker Compose**
+* **Prometheus**
+* **Node Exporter**
 * **Grafana OSS**
 * **Kali Linux (Host) + Docker-Container**
 
@@ -38,11 +37,7 @@
 ├── prometheus.yml
 ├── mosquitto.conf
 ├── s.sh
-├── datasource.png
-├── dashboard.png
-├── mqtt-datasource.png
-├── mqtt-dashboard.png
-└── doc.md           
+└── doc.md         
 ```
 
 ---
@@ -54,8 +49,8 @@
    ```bash
    mkdir ~/sq-grafana && cd ~/sq-grafana
    ```
-
 2. **`docker-compose.yml` erstellen**
+
    ```yml
    version: "3.8"
 
@@ -97,11 +92,11 @@
          - prometheus
          - mqtt-broker
       restart: unless-stopped
-                              
+
 
    ```
-
 3. **`prometheus.yml`**
+
    ```yml
     global:
     scrape_interval: 15s
@@ -113,7 +108,6 @@
         - targets:
             - 'node-exporter:9100'
    ```
-
 4. **`mosquitto.conf` **
 
 ```config
@@ -125,7 +119,7 @@ allow_anonymous true
 
 random 20.0–34.9°C Werte alle 5 Sek. als JSON { "value": xx.x }
 
-   ```bash
+```bash
    #!/bin/bash
 
    while true; do
@@ -135,7 +129,7 @@ random 20.0–34.9°C Werte alle 5 Sek. als JSON { "value": xx.x }
    sleep 5
    done
 
-   ```
+```
 
 6. **Stack starten**
 
@@ -154,7 +148,6 @@ docker-compose ps
    * URL: `http://localhost:3000`
    * login: **username: admin / password: admin** (die daten die ich im docker-compose angelegt habe.)
    * pwd ändern
-
 2. **Datenquelle hinzufügen**
 
    * Menü **Connections -> Data sources -> Add new data source**
@@ -163,7 +156,6 @@ docker-compose ps
    * **Save & Test**
    * **Ergebnis:** grüner Banner "Successfully queried the Prometheus API"
      ![datasource](datasource.png)
-
 3. **Dashboard importieren**
 
    * Menü **Dashboard -> new -> import**
@@ -175,9 +167,7 @@ docker-compose ps
 ## 6. Verifikation des Monitorings
 
 * **Prometheus Targets**: unter `http://localhost:9090/targets` zeigt node als UP.
-     ![datasource](target.png)
-
-
+  ![datasource](target.png)
 * **Grafana-Dashboard**:
 
   * CPU-Auslastung, RAM-Verbrauch, etc...
@@ -188,49 +178,52 @@ docker-compose ps
 
 6. MQTT → Grafana
 
-    MQTT-Plugin:
-    Falls noch nötig, in der grafana-shell (oder via GF_INSTALL_PLUGINS):
+   MQTT-Plugin:
+   Falls noch nötig, in der grafana-shell (oder via GF_INSTALL_PLUGINS):
 
-    sudo grafana-cli plugins install briangann-grafana-mqtt-datasource
-    sudo systemctl restart grafana-server
+   sudo grafana-cli plugins install briangann-grafana-mqtt-datasource
+   sudo systemctl restart grafana-server
 
-    Datenquelle:
+   Datenquelle:
 
-        ⚙️ Configuration → Add data source → MQTT
+   ⚙️ Configuration → Add data source → MQTT
 
-        Name: MQTT-Broker
+   Name: MQTT-Broker
 
-        Broker URL: tcp://mqtt-broker:1883
+   Broker URL: tcp://mqtt-broker:1883
 
-        Save & Test → Screenshot:
+  ![alt text](datasource_mqtt.png)
 
-    Panel erstellen:
 
-        ➕ Create → Dashboard → Add new panel
+   Panel erstellen:
 
-        Data source: MQTT-Broker
+   ➕ Create → Dashboard → Add new panel
 
-        Topic: test/topic
+   Data source: MQTT-Broker
 
-        Value field: value
+   Topic: test/topic
 
-        Visualization: Time series, Time range: Last 5 minutes → Apply
+   Value field: value
 
-        Screenshot:
+   Visualization: Time series, Time range: Last 5 minutes → Apply
+
+   Screenshot:
+
+   ![alt text](dashboard_mqtt.png)
 
 7. Issues & Lösungen
 
-    Mosquitto-Service scheiterte auf dem Host:
-    → haben stattdessen den Eclipse-Mosquitto-Container verwendet.
+   Mosquitto-Service scheiterte auf dem Host:
+   → haben stattdessen den Eclipse-Mosquitto-Container verwendet.
 
-    Port-Konflikte (1883) & Namenskonflikte:
-    → alte Container gelöscht, Ports nur für MQTT in Compose gemappt.
+   Port-Konflikte (1883) & Namenskonflikte:
+   → alte Container gelöscht, Ports nur für MQTT in Compose gemappt.
 
-    Leere MQTT-Panels:
-    → “Value field” auf value gesetzt und Table-View ausgeschaltet.
+   Leere MQTT-Panels:
+   → “Value field” auf value gesetzt und Table-View ausgeschaltet.
 
-    Integer-Division im Bash-Loop:
-    → durch AWK ersetzt, um Gleitkomma-Zahlen zu bekommen.
+   Integer-Division im Bash-Loop:
+   → durch AWK ersetzt, um Gleitkomma-Zahlen zu bekommen.
 
 ---
 
