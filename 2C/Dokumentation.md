@@ -176,54 +176,52 @@ docker-compose ps
 
 ---
 
-6. MQTT → Grafana
+## 6. MQTT → Grafana
 
-   MQTT-Plugin:
-   Falls noch nötig, in der grafana-shell (oder via GF_INSTALL_PLUGINS):
+### MQTT-Plugin Installation
+da wir es nicht im docker-compose hatten mussten wir noch folgendes machen:
 
-   sudo grafana-cli plugins install briangann-grafana-mqtt-datasource
-   sudo systemctl restart grafana-server
+```bash
+sudo grafana-cli plugins install briangann-grafana-mqtt-datasource
+sudo systemctl restart grafana-server
+```
 
-   Datenquelle:
+### Datenquelle Konfiguration
 
-   ⚙️ Configuration → Add data source → MQTT
+1. **Navigation**: ⚙️ Configuration -> Add data source -> MQTT
+2. **Einstellungen**:
+   - Name: `MQTT-Broker`
+   - Broker URL: `tcp://mqtt-broker:1883`
 
-   Name: MQTT-Broker
+success: 
+![MQTT Datasource Configuration](datasource_mqtt.png)
 
-   Broker URL: tcp://mqtt-broker:1883
+### Panel Erstellung
 
-  ![alt text](datasource_mqtt.png)
+1. **Panel erstellen**:  Dashboard -> Add new panel
+2. **Konfiguration**:
+   - Data source: `MQTT-Broker`
+   - Topic: `test/topic`
+   - Value field: `value`
+   - Visualization: Time series
+   - Time range: Last 5 minutes
+3. **Abschluss**: Apply
 
+![MQTT Dashboard Panel](dashboard_mqtt.png)
 
-   Panel erstellen:
+## 7. Issues & Lösungen
 
-   ➕ Create → Dashboard → Add new panel
+* **Mosquitto-Service Problem**:
+  - Issue: Service scheiterte auf dem Host
+  - Lösung: Verwendung des Eclipse-Mosquitto-Containers
 
-   Data source: MQTT-Broker
+* **Port- und Namenskonflikte**:
+  - Issue: konflikte auf port 1883
+  - Lösung: alte container gelöscht, ports nur für mwtt in compose gemappt
 
-   Topic: test/topic
-
-   Value field: value
-
-   Visualization: Time series, Time range: Last 5 minutes → Apply
-
-   Screenshot:
-
-   ![alt text](dashboard_mqtt.png)
-
-7. Issues & Lösungen
-
-   Mosquitto-Service scheiterte auf dem Host:
-   → haben stattdessen den Eclipse-Mosquitto-Container verwendet.
-
-   Port-Konflikte (1883) & Namenskonflikte:
-   → alte Container gelöscht, Ports nur für MQTT in Compose gemappt.
-
-   Leere MQTT-Panels:
-   → “Value field” auf value gesetzt und Table-View ausgeschaltet.
-
-   Integer-Division im Bash-Loop:
-   → durch AWK ersetzt, um Gleitkomma-Zahlen zu bekommen.
+* **Bash-Script Verbesserung**:
+  - Issue: konnte nich ausgeführt werden da bin bash gefehlt hatte am anfang
+  - Lösung: #!/bin/bash und mit `bash` command ausgeführt
 
 ---
 
