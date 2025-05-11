@@ -7,6 +7,7 @@
 * Dominik Könitzer - Recherche
 
 **Datum:** 11.05.2025
+
 **Deadline:** Vor dem Start des nächsten Unterrichtsblocks (14.05.2025)
 
 ---
@@ -131,6 +132,8 @@ random 20.0–34.9°C Werte alle 5 Sek. als JSON { "value": xx.x }
 
 ```
 
+![1746974178593](image/Dokumentation/1746974178593.png)
+
 6. **Stack starten**
 
 ```bash
@@ -176,7 +179,7 @@ docker-compose ps
 
 ---
 
-## 6. MQTT → Grafana
+## 7. MQTT → Grafana
 
 ### MQTT-Plugin Installation
 da wir es nicht im docker-compose hatten mussten wir noch folgendes machen:
@@ -202,14 +205,21 @@ success:
 2. **Konfiguration**:
    - Data source: `MQTT-Broker`
    - Topic: `test/topic`
-   - Value field: `value`
    - Visualization: Time series
-   - Time range: Last 5 minutes
+   - Time range: Last 5 minutes & last 6 hours
+   - view: table view als erstes dann ohne
 3. **Abschluss**: Apply
+
+table view: 
 
 ![MQTT Dashboard Panel](dashboard_mqtt.png)
 
-## 7. Issues & Lösungen
+ohne table view (mehr dashboard vibes): 
+
+![1746974812482](image/Dokumentation/1746974812482.png)
+
+
+## 8. Issues & Lösungen
 
 * **Mosquitto-Service Problem**:
   - Issue: Service scheiterte auf dem Host
