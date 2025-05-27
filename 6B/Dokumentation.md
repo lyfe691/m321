@@ -28,23 +28,50 @@
 ## 1  Bedeutung von Loadbalancing
 * **Definition**: Loadbalancer verteilen eingehende Anfragen (TCP-Verbindungen oder HTTP-Requests) auf mehrere Server-Instanzen.  
 * **Ziele**  
-  * Vermeidung von Single-Point-of-Failure → Hochverfügbarkeit  
-  * Gleichmässige Auslastung → bessere Performance  
+  * Vermeidung von Single-Point-of-Failure -> Hochverfügbarkeit  
+  * Gleichmässige Auslastung -> bessere Performance  
   * Transparente horizontale Skalierung ohne Änderung am Client  
-* Ohne Loadbalancer riskieren Unternehmen Ausfälle, lange Antwortzeiten und unzufriedene Nutzende. :contentReference[oaicite:0]{index=0}
+* Ohne Loadbalancer riskieren Unternehmen Ausfälle, lange Antwortzeiten und unzufriedene Nutzende.
 
 ---
 
 ## 2  Funktionsweise
-1. **DNS/Endpoint**: Client löst den DNS-Namen des ELB auf (TTL ≈ 60 s).  
-2. **Listener**: ELB hört auf definierte Ports (z. B. 443 HTTPS).  
-3. **Health Checks**: Unabhängige Prüfungen stellen sicher, dass nur _gesunde_ Targets Traffic erhalten.  
+1. **DNS/Endpoint**: Client löst den DNS Namen des ELB auf (TTL ~= 60 s).  
+2. **Listener**: ELB hört auf definierte Ports (zb 443 HTTPS).  
+3. **Health Checks**: Unabhängige Prüfungen stellen sicher, dass nur *gesunde* Targets Traffic erhalten.
 4. **Routing-Entscheid**  
-   * Pro Request/Verbindung wählt der ELB gemäss festgelegtem Algorithmus ein Ziel in einer Target-Gruppe.  
-5. **Verteilung über AZs**: ELB Instances stehen in mehreren Availability Zones und skalieren automatisch mit. :contentReference[oaicite:1]{index=1}
+   * Pro Request/Verbindung wählt der ELB gemäss festgelegtem Algorithmus ein Ziel in einer Target Gruppe.  
+5. **Verteilung über AZs**: ELB Instances stehen in mehreren Availability Zones und skalieren automatisch mit.
 
-> **Grafikplatzhalter**  
-> _Grafik: High-Level-Architektur – Clients → Route 53 → ALB → Target Group (EC2 Instanzen in 2 AZs)_
+> **Grafik:**  
+
+```mermaid
+---
+config:
+  theme: neo-dark
+  layout: dagre
+  look: neo
+---
+flowchart LR
+ subgraph Internet["Internet"]
+        A["Clients"]
+  end
+ subgraph subGraph1["Availability Zone 1"]
+        EC1["EC2 Instance 1"]
+  end
+ subgraph subGraph2["Availability Zone 2"]
+        EC2["EC2 Instance 2"]
+  end
+ subgraph subGraph3["AWS VPC"]
+    direction TB
+        subGraph1
+        subGraph2
+  end
+    A --> B["Route53 DNS"]
+    B --> C["Application Load Balancer"]
+    C --> TG["Target Group"]
+    TG --> EC1 & EC2
+```
 
 ---
 
@@ -52,38 +79,50 @@
 | Vorteil | Erläuterung |
 |---------|-------------|
 | **Hochverfügbarkeit** | Failover: Fällt ein Target aus, werden Requests zu gesunden Zielen umgeleitet. |
-| **Performance** | Verteilte Last ⇒ kürzere Antwortzeiten, höherer Durchsatz. |
-| **Skalierbarkeit** | Neue Instanzen lassen sich ohne Downtime in die Target-Gruppe aufnehmen (horizontal). |
+| **Performance** | Verteilte Last -> kürzere Antwortzeiten, höherer Durchsatz. |
+| **Skalierbarkeit** | Neue Instanzen lassen sich ohne Downtime in die Target Gruppe aufnehmen (horizontal). |
 | **Sicherheit** | Zentraler TLS-Termination-Punkt, integrierbar mit AWS WAF/Shield. |
-| **Betriebs­transparenz** | Access-Logs, Request-Tracing & CloudWatch-Metriken bieten Einblick. :contentReference[oaicite:2]{index=2} |
+| **Betriebs­transparenz** | Access-Logs, Request-Tracing & CloudWatch-Metriken bieten Einblick. |
 
 ---
 
-## 4  Load-Balancing-Algorithmus „Least Connection“
+## 4  Load-Balancing-Algorithmus "Least Connection"
 ### 4.1 Grundprinzip  
-Der **Least-Connection- (Least Outstanding Requests-) Algorithmus** leitet neue Anfragen an das Target mit den _wenigsten_ aktuell offenen Verbindungen/Requests. Damit eignet er sich besonders, wenn:
+Der **Least-Connection (Least Outstanding Requests) Algorithmus** leitet neue Anfragen an das Target mit den _wenigsten_ aktuell offenen Verbindungen/Requests. Damit eignet er sich besonders, wenn:
 
 * Requests unterschiedlich lange laufen (z. B. datenbanklastige Queries).  
 * Instanzen ähnliche Hardware haben, sich die Last aber dynamisch verändert.
 
 ### 4.2 Implementierung bei AWS ELB
-* **Classic LB**: HTTP/HTTPS-Listener nutzen Least Outstanding Requests, TCP-Listener Round Robin. :contentReference[oaicite:3]{index=3}  
-* **Application LB**: Routing-Algorithmus ist pro Target-Gruppe umschaltbar; neben Round Robin steht „Least Outstanding Requests“ zur Wahl. :contentReference[oaicite:4]{index=4}
+* **Classic LB**: HTTP/HTTPS-Listener nutzen Least Outstanding Requests, TCP-Listener Round Robin.  
+* **Application LB**: Routing-Algorithmus ist pro Target-Gruppe umschaltbar; neben Round Robin steht „Least Outstanding Requests“ zur Wahl.
 
-### 4.3 Ablaufdiagramm (Textskizze)
-
-> **Screenshotplatzhalter**  
-> _Screenshot: AWS Console → Target Group → Attribute → Routing algorithm = Least outstanding requests_
+### 4.3 Ablaufdiagramm
+  
+```mermaid
+---
+config:
+  theme: neo-dark
+  layout: dagre
+---
+flowchart LR
+    A["AWS Management Console"] --> B["EC2 Dashboard"]
+    B --> C["Target Groups"]
+    C --> D["&lt; MyTargetGroup &gt;"]
+    D --> E["Attributes Tab"]
+    E --> F["Routing Algorithm"]
+    F --> G["Least outstanding requests ✓"]
+```
 
 ---
 
 ## 5  Beitrag zur Leistung, Skalierbarkeit & Verfügbarkeit
 | Aspekt | Wie ELB hilft |
 |--------|---------------|
-| **Leistung** | Gleichmässige Verteilung reduziert Queuing; „Slow Start“ (Ramp-Up) verhindert Instanz-Überlast beim Hinzufügen. :contentReference[oaicite:5]{index=5} |
+| **Leistung** | Gleichmässige Verteilung reduziert Queuing; Slow Start verhindert Instanz-Überlast beim Hinzufügen. |
 | **Skalierbarkeit** | Auto Scaling kann Instanzen nach Bedarf starten/stoppen; ELB registriert sie automatisch. |
 | **Redundanz** | Mehrere AZs → AZ-Failover; Cross-Zone-LB verteilt Traffic auch bei ungleicher Instanzanzahl. |
-| **Verfügbarkeit** | 99.99 % SLA (ALB/NLB); Health Checks + automatisches Skalieren der LB-Nodes. :contentReference[oaicite:6]{index=6} |
+| **Verfügbarkeit** | 99.99 % SLA (ALB/NLB); Health Checks + automatisches Skalieren der LB-Nodes.
 
 ---
 
@@ -97,10 +136,27 @@ AWS ELB ist ein _Fully-Managed_ Service, der in drei Varianten angeboten wird:
 | **Network LB** | L4 (TCP/UDP/TLS) | Millionen RPS, statische IP/EIP, TLS-Pass-Through, Einstieg für on-prem VPN |
 | **Gateway LB** | L3 | Transparentes Einbinden von Third-Party-Appliances (Firewalls, IDS) |
 
-ELB erledigt alle Skalierungs-, Wartungs- und Patch-Aufgaben automatisch. :contentReference[oaicite:7]{index=7}  
-
-> **Screenshotplatzhalter**  
-> _Screenshot: AWS Console → EC2 → Load Balancers Übersicht (ALB, NLB, GLB Tabelle)_
+ELB erledigt alle Skalierungs-, Wartungs- und Patch-Aufgaben automatisch.
+  
+```mermaid
+---
+config:
+  theme: neo-dark
+---
+flowchart TB
+ subgraph subGraph0["Load Balancers Übersicht"]
+    direction TB
+        ALB["Application&nbsp;Load&nbsp;Balancer<br>(ALB)"]
+        NLB["Network&nbsp;Load&nbsp;Balancer<br>(NLB)"]
+        GLB["Gateway&nbsp;Load&nbsp;Balancer<br>(GLB)"]
+  end
+    A["AWS&nbsp;Management&nbsp;Console"] --> B["EC2&nbsp;Dashboard"]
+    B --> C["Load&nbsp;Balancers"]
+    C --> ALB & NLB & GLB
+    style ALB stroke-width:1,stroke:#000000
+    style NLB stroke-width:1,stroke:#000000
+    style GLB stroke-width:1,stroke:#000000
+```
 
 ### 6.2 Typische Anwendung
 * **Web- & API-Frontends**: ALB mit Path-Based-Routing auf Microservices / ECS Tasks / EKS Pods.  
@@ -111,7 +167,7 @@ ELB erledigt alle Skalierungs-, Wartungs- und Patch-Aufgaben automatisch. :conte
 * HTTPS Offloading / TLS 1.3  
 * HTTP/2 & gRPC  
 * Sticky Sessions (Cookie-basiert)  
-* Access-Logs & Request-Tracing Header (X-Amzn-Trace-Id) :contentReference[oaicite:8]{index=8}  
+* Access-Logs & Request-Tracing Header (X-Amzn-Trace-Id)
 * Integration: AWS Auto Scaling, CloudWatch Alarms, WAF, Shield, PrivateLink
 
 ---
@@ -155,7 +211,4 @@ ELB erledigt alle Skalierungs-, Wartungs- und Patch-Aufgaben automatisch. :conte
 | **Pünktliche Abgabe** | |
 
 ---
-
-> **Hinweis zur Weiterbearbeitung:**  
-> Ergänzt bitte die angegebenen Screenshot- und Grafikplatzhalter durch eigene Bilder (Console-Screens, Diagramme), passt die Checkliste an euren tatsächlichen Stand an und fügt bei Bedarf Beispiel-Konfigurationen (Terraform, CLI) ein. So erreicht ihr alle Bewertungspunkte.
 
