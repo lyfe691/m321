@@ -33,8 +33,7 @@
 6. [Produktvorstellung : AWS Elastic Load Balancing](#6-produktvorstellung--aws-elastic-load-balancing)
 7. [Voraussetzungen an die IT-Infrastruktur](#7-voraussetzungen-an-die-it-infrastruktur)
 8. [Ab wann lohnt sich Loadbalancing?](#8-ab-wann-lohnt-sich-loadbalancing)
-9. [Checkliste (Bewertungs­kriterien)](#9-checkliste-bewertungskriterien)
-
+9. [Fazit](#fazit)
 ---
 
 ## 1  Bedeutung von Loadbalancing
@@ -133,14 +132,14 @@ flowchart LR
 |--------|---------------|
 | **Leistung** | Gleichmässige Verteilung reduziert Queuing; Slow Start verhindert Instanz-Überlast beim Hinzufügen. |
 | **Skalierbarkeit** | Auto Scaling kann Instanzen nach Bedarf starten/stoppen; ELB registriert sie automatisch. |
-| **Redundanz** | Mehrere AZs → AZ-Failover; Cross-Zone-LB verteilt Traffic auch bei ungleicher Instanzanzahl. |
+| **Redundanz** | Mehrere AZs -> AZ-Failover; Cross-Zone-LB verteilt Traffic auch bei ungleicher Instanzanzahl. |
 | **Verfügbarkeit** | 99.99 % SLA (ALB/NLB); Health Checks + automatisches Skalieren der LB-Nodes.
 
 ---
 
 ## 6  Produktvorstellung : AWS Elastic Load Balancing
 ### 6.1 Überblick  
-AWS ELB ist ein _Fully-Managed_ Service, der in drei Varianten angeboten wird:
+AWS ELB ist ein Fully managed Service, der in drei Varianten angeboten wird:
 
 | Typ | OSI-Schicht | Use Case-Highlights |
 |-----|-------------|---------------------|
@@ -200,7 +199,7 @@ Health-Check-Pfad definiert:
 * **AWS-Konto & IAM-Rollen** (Least Privilege, ELB-FullAccess für Terraform/CloudFormation).  
 * **Netzwerk-Setup**  
   * VPC mit mindestens **zwei** öffentlichen Subnetzen (je AZ) für den LB.  
-  * Security Groups: Ingress → 443/80 aus dem Internet; Egress → Targets.  
+  * Security Groups: Ingress -> 443/80 aus dem Internet; Egress -> Targets.  
 * **Compute-Ressourcen**  
   * EC2, ECS (Fargate), EKS oder Lambda als Targets.  
 * **Domain-Management**  
@@ -208,7 +207,7 @@ Health-Check-Pfad definiert:
 * **CLI / IaC-Tooling**  
   * AWS CLI v2, Terraform oder AWS CDK für Automatisierung.  
 * **Monitoring**  
-  * CloudWatch Logs & Metrics, ggf Grafana/Prometheus-Exporter.
+  * CloudWatch Logs & Metrics, ggf. Grafana/Prometheus Exporter!!!!.
 
 ---
 
@@ -218,9 +217,20 @@ Health-Check-Pfad definiert:
 | **> ~70 % CPU-Auslastung** oder **lange Queue Times** auf einer einzelnen Instanz | Verteilte Last senkt Latenz. |
 | **SPOF-Risiko**: Nur **eine** Server-Instanz | LB sorgt für Redundanz. |
 | **Geplantes Wachstum** (Marketing-Kampagne, Black Friday) | Schnelle horizontale Skalierung ohne Downtime. |
-| **Regulatorische oder SLA-Vorgaben** (≥ 99.9 % Uptime) | ELB erfüllt hohe Verfügbarkeits­anforderungen out-of-the-box. |
+| **Regulatorische oder SLA-Vorgaben** (> 99.9 % Uptime) | ELB erfüllt hohe Verfügbarkeits­anforderungen out of the box. |
 | **Multi-AZ-Resilienz** | Pflicht in hochkritischen Produktiv­umgebungen. |
 
 
 ---
 
+## Fazit
+
+Ein Loadbalancer ist ein essenzieller Bestandteil moderner IT-Infrastrukturen, insbesondere bei hochverfügbaren, skalierbaren Web- und Cloud-Anwendungen. Durch die gezielte Verteilung des Datenverkehrs auf mehrere Server erhöht er nicht nur die Leistungsfähigkeit eines Systems, sondern minimiert gleichzeitig das Risiko eines Ausfalls.
+
+Die Analyse des AWS Elastic Load Balancers (ELB) zeigt, wie ein vollständig verwalteter Dienst Unternehmen in die Lage versetzt, auch bei hohem Traffic zuverlässig und sicher zu operieren. Dank flexibler Algorithmen wie „Least Outstanding Requests“ und tiefer Integration in andere AWS-Dienste wie Auto Scaling, CloudWatch und WAF bietet ELB eine robuste, skalierbare Lösung für unterschiedlichste Anwendungsszenarien.
+
+Ab einer gewissen Systemlast oder bei steigenden Anforderungen an Verfügbarkeit, Redundanz und Skalierbarkeit ist der Einsatz eines Loadbalancers nicht nur sinnvoll, sondern notwendig, um den heutigen Qualitätsansprüchen gerecht zu werden.
+
+---
+
+**Ende der Dokumentation.**
