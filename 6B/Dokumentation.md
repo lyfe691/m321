@@ -28,11 +28,11 @@
 1. [Bedeutung von Loadbalancing](#1-bedeutung-von-loadbalancing)
 2. [Funktionsweise](#2-funktionsweise)
 3. [Vorteile eines Load Balancers](#3-vorteile-eines-load-balancers)
-4. [Load-Balancing-Algorithmus „Least Connection“](#4-load-balancing-algorithmus-leastconnection)
-5. [Beitrag zur Leistung, Skalierbarkeit & Verfügbarkeit](#5-beitrag-zur-leistung-skalierbarkeit--verfügbarkeit)
-6. [Produktvorstellung : AWS Elastic Load Balancing](#6-produktvorstellung--aws-elastic-load-balancing)
+4. [Load-Balancing-Algorithmus Least Connection](#4-load-balancing-algorithmus-least-connection)
+5. [Beitrag zur Leistung, Skalierbarkeit und Verfügbarkeit](#5-beitrag-zur-leistung-skalierbarkeit-und-verfugbarkeit)
+6. [Produktvorstellung AWS Elastic Load Balancing](#6-produktvorstellung-aws-elastic-load-balancing)
 7. [Voraussetzungen an die IT-Infrastruktur](#7-voraussetzungen-an-die-it-infrastruktur)
-8. [Ab wann lohnt sich Loadbalancing?](#8-ab-wann-lohnt-sich-loadbalancing)
+8. [Ab wann lohnt sich Loadbalancing](#8-ab-wann-lohnt-sich-loadbalancing)
 9. [Fazit](#fazit)
 ---
 
