@@ -10,6 +10,18 @@
 
 **Deadline:** Vor dem Start des nächsten Unterrichtsblocks (28.05.2025)
 
+<br>
+
+
+
+![1748380746303](image/Dokumentation/1748380746303.png)
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+
 ---
 
 ## Inhaltsverzeichnis
@@ -98,7 +110,7 @@ Der **Least-Connection (Least Outstanding Requests) Algorithmus** leitet neue An
 * **Application LB**: Routing-Algorithmus ist pro Target-Gruppe umschaltbar; neben Round Robin steht „Least Outstanding Requests“ zur Wahl.
 
 ### 4.3 Ablaufdiagramm
-  
+
 ```mermaid
 ---
 config:
@@ -137,7 +149,7 @@ AWS ELB ist ein _Fully-Managed_ Service, der in drei Varianten angeboten wird:
 | **Gateway LB** | L3 | Transparentes Einbinden von Third-Party-Appliances (Firewalls, IDS) |
 
 ELB erledigt alle Skalierungs-, Wartungs- und Patch-Aufgaben automatisch.
-  
+
 ```mermaid
 ---
 config:
@@ -170,6 +182,18 @@ flowchart TB
 * Access-Logs & Request-Tracing Header (X-Amzn-Trace-Id)
 * Integration: AWS Auto Scaling, CloudWatch Alarms, WAF, Shield, PrivateLink
 
+### 6.4 Target Group anlegen (Beispiel)
+
+Der erste Schritt, um Instanzen am Application Load Balancer zu registrieren,
+ist das Erstellen einer **Target Group**.  
+Im AWS-Dialog „Create target group“ werden Name, Protokoll, Port, VPC und
+Health-Check-Pfad definiert:
+
+![1748380244244](image/Dokumentation/1748380244244.png)
+
+*Abbildung X: Konfiguration einer neuen Target Group  
+(`Protocol = HTTP`, `Port = 80`, Health-Check Pfad `/`).*
+
 ---
 
 ## 7  Voraussetzungen an die IT-Infrastruktur
@@ -182,9 +206,9 @@ flowchart TB
 * **Domain-Management**  
   * Route 53 Record (Alias) oder externes DNS mit CNAME auf `<elb-dns>.amazonaws.com`.  
 * **CLI / IaC-Tooling**  
-  * AWS CLI v2, Terraform ≥ 1.5 oder AWS CDK für Automatisierung.  
+  * AWS CLI v2, Terraform oder AWS CDK für Automatisierung.  
 * **Monitoring**  
-  * CloudWatch Logs & Metrics, ggf. Grafana/Prometheus-Exporter.
+  * CloudWatch Logs & Metrics, ggf Grafana/Prometheus-Exporter.
 
 ---
 
@@ -197,18 +221,6 @@ flowchart TB
 | **Regulatorische oder SLA-Vorgaben** (≥ 99.9 % Uptime) | ELB erfüllt hohe Verfügbarkeits­anforderungen out-of-the-box. |
 | **Multi-AZ-Resilienz** | Pflicht in hochkritischen Produktiv­umgebungen. |
 
----
-
-## 9  Checkliste (Bewertungskriterien)
-
-| Kriterium | ✔ erledigt? |
-|-----------|-------------|
-| **Dokumentation**: korrekt, vollständig, nachvollziehbar | |
-| **Formalien & Gestaltung**: sinnvolle Überschriften, Grafiken/Screenshots-Platzhalter | |
-| **Themen (1-8) vollständig** | |
-| **Logische Struktur („roter Faden“) & TOC** | |
-| **Kooperation**: Arbeitsteilung dokumentiert (z. B. Git Commit-History) | |
-| **Pünktliche Abgabe** | |
 
 ---
 
