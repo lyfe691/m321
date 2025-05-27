@@ -114,6 +114,13 @@ Screenshot einfügen hier:
 ![1748371535215](image/Dokumentation/1748371535215.png)
 
 ```bash
+┌──(kali㉿kali)-[~/sq-grafana]
+└─$ docker ps                      
+CONTAINER ID   IMAGE                        COMMAND                  CREATED          STATUS          PORTS                                       NAMES
+305f0123c1a6   sq-grafana_sensor1           "/bin/sh -c 'java -j…"   2 minutes ago    Up 2 minutes                                                sensor1
+705c95d6bd05   sq-grafana_sensor2           "/bin/sh -c 'java -j…"   2 minutes ago    Up 2 minutes                                                sensor2
+27c78df606ed   grafana/grafana-oss:11.0.1   "/run.sh"                49 minutes ago   Up 29 minutes   0.0.0.0:3000->3000/tcp, :::3000->3000/tcp   grafana
+aa5aeadc7363   eclipse-mosquitto:2.0.21     "/docker-entrypoint.…"   49 minutes ago   Up 49 minutes   0.0.0.0:1883->1883/tcp, :::1883->1883/tcp   mqtt-broker
 
 ```
 
