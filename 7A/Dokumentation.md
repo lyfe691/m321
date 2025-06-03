@@ -18,11 +18,11 @@
 2. Architektur & Technologien
 3. Projektstruktur
 4. Docker-Compose-Stack
-5. Erstellung des Dashboards
-6. Schritt 1 - Container Stack Starten
-7. Schritt 2 - Prometheus in Grafana verbinden
-8. Schritt 3 - Dashboard erstellen
-9. Dashboard-Übersicht
+5. Schritt 1 - Container Stack Starten
+6. Schritt 2 - Prometheus in Grafana verbinden
+7. Schritt 3 - Dashboard erstellen
+8. Gesamtes Dashboard
+9. Extra: Website- & SSL-Monitoring
 10. Reflexion
 
 ---
@@ -64,7 +64,7 @@ Im Rahmen dieses SideQuests wurde ein Monitoring-System aufgesetzt, um die versc
 
 ### **docker-compose.yml**: 
 
-[!NOTE]
+>[!NOTE]
 > Zur Info, es wäre besser  gewesen die prometheus datasource und grafana dashboard zu mounten damit sie nicht verloren gehen, wenn der container down geht --  ist mir aber erst später aufgefallen, weshalb ichs ohne gemacht habe.
 
 ```yaml
@@ -227,7 +227,23 @@ Alle drei Panels wurden in einem Dashboard zusammengeführt und zeigen Live-Date
 
 ---
 
-## 9. Reflexion
+## 9. Extra: Website- & SSL-Monitoring
+
+Zusätzlich habe ich ein Panel integriert, das mithilfe des **Blackbox Exporters** das Ablaufdatum des SSL-Zertifikats meiner Website [`sola.ysz.life`](https://sola.ysz.life) in Tagen anzeigt.
+
+Dazu wurde folgende PromQL-Query verwendet:
+
+```promql
+round((probe_ssl_earliest_cert_expiry{instance="https://sola.ysz.life"} - time()) / 86400)
+```
+
+> unit: custom -> days
+
+![1748983410226](image/Dokumentation/1748983410226.png)
+
+---
+
+## 10. Reflexion
 
  - Technik: Reibungslose Installation via Docker; Node-Exporter liefert sofort Basis-Metriken.
  - Problembehebung: 
@@ -237,6 +253,7 @@ Alle drei Panels wurden in einem Dashboard zusammengeführt und zeigen Live-Date
     - Prometheus-Targets korrekt definieren.
     - Verständnis von Query-Optimierung
     - Grafana-Panels gezielt gestalten und anpassen (Einheiten, Visualisierung, Farbschemata).
+    - Blackbox Exporter integrieren und PromQL-Query anpassen.
 
 Beim nächsten Mal würde ich die Prometheus-Datenquelle sowie das Dashboard persistent speichern (z. B. via Volumes), um Datenverlust beim Neustarten der Container zu vermeiden.
 
